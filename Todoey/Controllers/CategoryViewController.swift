@@ -19,8 +19,9 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
         
         loadCategories()
-
+        self.tableView.register(UINib(nibName: "CategoryCell", bundle: nil), forCellReuseIdentifier: "CategoryCell")
     }
+    
     
     //MARK: - TableView Datasource Methods
     
@@ -32,14 +33,16 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as? CategoryCell else { return UITableViewCell()}
         
-        cell.textLabel?.text = categories[indexPath.row].name
-        
+        cell.categoryLabel.text = categories[indexPath.row].name
+        cell.numberLabel.text = categories[indexPath.row].number
         return cell
-        
     }
 
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        80
+    }
     
     //MARK: - TableView Delegate Methods
     
@@ -53,6 +56,7 @@ class CategoryViewController: UITableViewController {
         if let indexPath = tableView.indexPathForSelectedRow {
             destinationVC.selectedCategory = categories[indexPath.row]
         }
+        
     }
     
     //MARK: - Data Manipulation Methods
@@ -82,12 +86,11 @@ class CategoryViewController: UITableViewController {
         
     }
     
-    
     //MARK: - Add New Categories
-
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()
+        var numberTextField = UITextField()
         
         let alert = UIAlertController(title: "Add New Category", message: "", preferredStyle: .alert)
         
@@ -95,13 +98,15 @@ class CategoryViewController: UITableViewController {
             
             let newCategory = Category(context: self.context)
             newCategory.name = textField.text!
-            
+            newCategory.number = numberTextField.text!
             self.categories.append(newCategory)
-            
             self.saveCategories()
-            
         }
         
+        let cancel = UIAlertAction(title: "Cancel", style: .default) { (action) in
+    
+        }
+        alert.addAction(cancel)
         alert.addAction(action)
         
         alert.addTextField { (field) in
@@ -109,12 +114,10 @@ class CategoryViewController: UITableViewController {
             textField.placeholder = "Add a new category"
         }
         
+        alert.addTextField { numberField in
+            numberTextField = numberField
+            numberTextField.placeholder = "Phone number"
+        }
         present(alert, animated: true, completion: nil)
-        
     }
-    
-
-    
-    
-    
 }
